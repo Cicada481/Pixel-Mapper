@@ -1,3 +1,3 @@
 # Pixel-Mapper
 
-A full-stack web application where a user signs in with Google, provides a Google Sheet URL, uploads an image, and the backend processes the image to color the cells of the specified Google Sheet directly using the image's pixel data.
+A full-stack web application where a user logs in using Google, inputs a URL to a Google Sheet, uploads an image, and the backend processes the image to color cells of the specified Google Sheet directly based on pixel data of the image.
