@@ -5,18 +5,23 @@ const cors = require('cors')
 const session = require('express-session')
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy
+const multer = require('multer')
+const fs = require('fs')
+const path = require('path')
 
 const app = express()
 
 const PORT = process.env.PORT || 3001
+const UPLOADS_DIR = path.join(__dirname, 'image_uploads')
 
-app.use(cors())
-app.use(express.json())
-app.use(session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false
-}))
+if (!fs.existsSync(UPLOADS_DIR)) {
+    try {
+        fs.mkdirSync(UPLOADS_DIR, {recursive: true})
+    } catch (error) {
+        console.error(`Failed to create ${UPLOADS_DIR}`, error)
+        process.exit(1)
+    }
+}
 
 // called after verify function
 passport.serializeUser((user, done) => {
@@ -35,6 +40,27 @@ passport.use(new GoogleStrategy({
 }, (accessToken, refreshToken, profile, done) => { // verify function
     profile.accessToken = accessToken
     done(null, profile)
+}))
+
+const imageStorage = multer.diskStorage({
+    destination: (req, file, done) => {
+        done(null, UPLOADS_DIR)
+    },
+    filename: (req, file, done) => {
+        done(null, Date.now() + '-' + file.originalname)
+    }
+})
+
+const imageUpload = multer({storage: imageStorage})
+
+// MIDDLEWARE STACK
+
+app.use(cors())
+app.use(express.json())
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
 }))
 
 app.use(passport.initialize())
