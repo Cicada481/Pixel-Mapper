@@ -6,7 +6,7 @@ const session = require('express-session')
 const passport = require('passport')
 const GoogleStrategy = require('passport-google-oauth20').Strategy
 const multer = require('multer')
-const fs = require('fs').promises // async version
+const fs = require('fs')
 const path = require('path')
 const { Jimp } = require('jimp')
 const { intToRGBA } = require('@jimp/utils')
@@ -18,20 +18,18 @@ const PORT = process.env.PORT || 3001
 const UPLOADS_DIR_PATH = path.join(__dirname, 'image_uploads')
 const REDIRECT_URI = `http://localhost:${PORT}/auth/google/callback`;
 
-// Creates upload directory path if it does not exist
-(async () => {
-    try {
-        await fs.mkdir(UPLOADS_DIR_PATH, {recursive: true})
-        console.log(`Directory ${UPLOADS_DIR_PATH} created`)
-    } catch (error) {
-        if (error.code === 'EEXIST') {
-            console.log('Directory already exists')
-        } else {
-            console.error("Could not ensure directory path", error.stack)
-            process.exit(1)
-        }
+// Create image uploads directory path
+try {
+    const dirPath = fs.mkdirSync(UPLOADS_DIR_PATH, {recursive: true})
+    if (dirPath) {
+        console.log(`Directory ${dirPath} created`)
+    } else {
+        console.log(`Directory ${UPLOADS_DIR_PATH} already exists`)
     }
-})()
+} catch (error) {
+    console.error(error.stack)
+    process.exit(1)
+}
 
 // called after verify function
 passport.serializeUser((user, done) => {
@@ -109,9 +107,10 @@ app.get('/api/status', (req, res) => {
 // Content-Type multipart/form-data to be parsed by Multer instance
 app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) => {
     try {
-        if (!req.user) {
-            return res.status(401).json({message: 'not logged in'})
-        }
+        // TBD add later
+        // if (!req.user) {
+        //     return res.status(401).json({message: 'not logged in'})
+        // }
 
         // Parse spreadsheet for ID
         if (!req.body.sheetUrl) {
@@ -119,19 +118,18 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         }
 
         let sheetUrl = req.body.sheetUrl
-        let sheetIDStart = sheetUrl.indexOf('/d/') + '/d/'.length
-        let sheetIDEnd = sheetUrl.indexOf('/edit')
-        if (sheetIDStart === -1 || sheetIDEnd === -1) {
+        let spreadsheetIDStart = sheetUrl.indexOf('/d/') + '/d/'.length
+        let spreadsheetIDEnd = sheetUrl.indexOf('/edit')
+        if (spreadsheetIDStart === -1 || spreadsheetIDEnd === -1) {
             return res.status(400).json({message: 'Invalid spreadsheet link'})
         }
-        let sheetID = sheetUrl.substring(sheetIDStart, sheetIDEnd)
+        let spreadsheetId = sheetUrl.substring(spreadsheetIDStart, spreadsheetIDEnd)
 
         // Image processing
         const image = await Jimp.read(req.file.path) // asynchronous operation
 
-        const TARGET_SHEET_COLUMNS = 20
-        image.resize({w: TARGET_SHEET_COLUMNS}) // Resize image
-        console.log('new image dimensions', image.width, image.height)
+        const TARGET_SHEET_COLUMNS = 150
+        image.resize({w: TARGET_SHEET_COLUMNS}) // Bilinear interpolation
         
         const colorGrid = [] // Extract colors to 2D array
         for (let i = 0; i < image.height; i++) {
@@ -140,21 +138,63 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
                 colorGrid[i][j] = intToRGBA(image.getPixelColor(j, i))
             }
         }
-        console.log(colorGrid[0]) // first row of color grid
 
         // Set up an OAuth2 client instance to communicate with Sheets API
         const oauth2Client = new google.auth.OAuth2(
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET
         )
-        oauth2Client.setCredentials({access_token: req.user.accessToken})
+        // TBD Fix hardcoding of access token
+        oauth2Client.setCredentials({access_token: process.env.TEST_ACCESS_TOKEN || req.user.accessToken})
         const sheets = google.sheets({version: 'v4', auth: oauth2Client})
 
-        console.log('sheets', sheets)
-        // TBD
+        const sheetId = 0 // TBD change later
+        
+        // Create an array of RowData objects and fill it
+        // Needed for creation of UpdateCellsRequest
+        const rows = []
+        for (let i = 0; i < colorGrid.length; i++) {
+            const rowValues = []
+            for (let j = 0; j < colorGrid[0].length; j++) {
+                // Set color of spreadsheet cell
+                const currentColor = colorGrid[i][j]
+                const cellData = {
+                    userEnteredFormat: {
+                        backgroundColorStyle: {
+                            rgbColor: {
+                                red: currentColor.r / 255,
+                                green: currentColor.g / 255,
+                                blue: currentColor.b / 255
+                            }
+                        }
+                    }
+                } // a CellData object
+                rowValues.push(cellData)
+            }
+            rows.push({values: rowValues}) // Append this row of cell values
+        }
+
+        const updateCells = { // An UpdateCellsRequest object
+            rows,
+            fields: 'userEnteredFormat/backgroundColorStyle',
+            start: {
+                sheetId,
+                rowIndex: 0,
+                columnIndex: 0
+            }
+        }
+        // Sheets API call
+        // TBD add error checking (e.g. if API call fails)
+        const response = await sheets.spreadsheets.batchUpdate({
+            spreadsheetId,
+            requestBody: {
+                requests: [{updateCells}]
+            }
+        })
+        console.log("After Sheets API call")
 
         // Send back parsed ID
-        res.json({parsedId: sheetID, fileName: req.file.originalname})
+        res.json({parsedId: spreadsheetId, fileName: req.file.originalname})
     } catch (error) {
         console.error(error.stack)
         res.status(500).json({message: "An unexpected error occured"})
@@ -164,3 +204,4 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
 app.listen(PORT, () => {
     console.log(`Backend server is up and running on port ${PORT}`)
 })
+
