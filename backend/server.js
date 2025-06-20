@@ -18,22 +18,11 @@ const PORT = process.env.PORT || 3001
 const UPLOADS_DIR_PATH = path.join(__dirname, 'image_uploads')
 const REDIRECT_URI = `http://localhost:${PORT}/auth/google/callback`;
 
-// Checks if the user entered a positive number
-const validatePositiveInt = (userEnteredData) => {
-    const parsedData = parseInt(userEnteredData)
-    if (parsedData === NaN || parsedData <= 0) {
-        return undefined
-    }
-    return parsedData
-}
-
 // Create image uploads directory path
 try {
     const dirPath = fs.mkdirSync(UPLOADS_DIR_PATH, {recursive: true})
     if (dirPath) {
         console.log(`Directory ${dirPath} created`)
-    } else {
-        console.log(`Directory ${UPLOADS_DIR_PATH} already exists`)
     }
 } catch (error) {
     console.error(error.stack)
@@ -67,7 +56,6 @@ const imageStorage = multer.diskStorage({
         done(null, Date.now() + '-' + file.originalname)
     }
 })
-
 const formUpload = multer({storage: imageStorage})
 
 // MIDDLEWARE STACK
@@ -79,10 +67,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }))
-
 app.use(passport.initialize())
-
 app.use(passport.session()) // uses session ID in cookie to populate req.user
+
+// ROUTES
 
 app.get('/auth/google', passport.authenticate('google', {
     scope: ['profile', 'https://www.googleapis.com/auth/spreadsheets']
@@ -124,9 +112,9 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         // Image details are contained in req.file
 
         // Parse data entered by the user via form
-        const numColumns = validatePositiveInt(req.body.numColumns)
-        const cellWidth = validatePositiveInt(req.body.cellWidth)
-        const cellHeight = validatePositiveInt(req.body.cellHeight)
+        const numColumns = parseInt(req.body.numColumns) // TBD check positive?
+        const cellWidth = parseInt(req.body.cellWidth)
+        const cellHeight = parseInt(req.body.cellHeight)
         const sheetUrl = req.body.sheetUrl
         console.log('Form dimensions data', numColumns, cellWidth, cellHeight)
         console.log('Spreadsheet URL', sheetUrl)
@@ -135,7 +123,6 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         const spreadsheetIdStart = sheetUrl.indexOf('/d/') + '/d/'.length
         const spreadsheetIdEnd = sheetUrl.indexOf('/edit')
         if (spreadsheetIdStart === -1 || spreadsheetIdEnd === -1) {
-            console.log(sheetUrl)
             return res.status(400).json({message: 'Link missing spreadsheet id'})
         }
         const spreadsheetId = sheetUrl.substring(spreadsheetIdStart, spreadsheetIdEnd)
@@ -144,14 +131,16 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         const sheetIdStart = sheetUrl.indexOf('?gid=') + '?gid='.length
         const sheetIdEnd = sheetUrl.indexOf('#gid=')
         if (sheetIdStart === -1 || sheetIdEnd === -1) {
-            console.log(sheetUrl)
             return res.status(400).json({message: 'Link missing sheet id'})
         }
         const sheetId = sheetUrl.substring(sheetIdStart, sheetIdEnd)
         
-        // Extract the colors of the uploaded image into a 2D array
+        // Read image from path and resize image
         const image = await Jimp.read(req.file.path)
+        fs.promises.unlink(req.file.path) // Delete the temporarily uploaded file
         image.resize({w: numColumns}) // Bilinear interpolation
+
+        // Extract the colors from image into a 2D array
         const colorGrid = []
         for (let i = 0; i < image.height; i++) {
             colorGrid[i] = []
@@ -176,6 +165,9 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         const targetSheet = targetSpreadsheetResponse.data.sheets.find(sheetItem => {
             return sheetItem.properties.sheetId === parseInt(sheetId)
         })
+        if (!targetSheet) {
+            return res.status(400).json({message: 'Invalid sheet ID'})
+        }
         const targetSheetGridProperties = targetSheet.properties.gridProperties
         const oldRowCount = targetSheetGridProperties.rowCount
         const oldColumnCount = targetSheetGridProperties.columnCount
@@ -224,7 +216,7 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         if (cellHeight) {
             const updateCellHeights = { // UpdateDimensionPropertiesRequest object
                 properties: {
-                    pixelSize: cellHeight
+                    pixelSize: cellHeight + 1 // To account for Sheets API offset
                 },
                 fields: 'pixelSize',
                 range: {
@@ -237,29 +229,26 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
             requests.push({updateDimensionProperties: updateCellHeights})
         }
         
-        // Create an array of RowData objects and fill it
-        // Needed for creation of UpdateCellsRequest
-        const rows = []
-        for (let i = 0; i < colorGrid.length; i++) {
-            const rowValues = []
-            for (let j = 0; j < colorGrid[0].length; j++) {
-                // Set color of spreadsheet cell
-                const currentColor = colorGrid[i][j]
-                const cellData = { // a CellData object
+        // Create an array of RowData objects
+        // Needed for creation of an UpdateCellsRequest
+        const rows = colorGrid.map(colorRow => {
+            const rowDataValues = colorRow.map(color => {
+                return { // a CellData object
                     userEnteredFormat: {
                         backgroundColorStyle: {
                             rgbColor: {
-                                red: currentColor.r / 255,
-                                green: currentColor.g / 255,
-                                blue: currentColor.b / 255
+                                red: color.r / 255,
+                                green: color.g / 255,
+                                blue: color.b / 255
                             }
                         }
                     }
                 }
-                rowValues.push(cellData)
+            })
+            return { // a RowData object
+                values: rowDataValues
             }
-            rows.push({values: rowValues}) // Append this row of cell values
-        }
+        })
 
         // Fill cells with colors
         const colorCells = { // An UpdateCellsRequest object
@@ -274,32 +263,42 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         requests.push({updateCells: colorCells})
         
         // Make an external API call to update the spreadsheet
-        const batchUpdateResponse = await sheets.spreadsheets.batchUpdate({
+        await sheets.spreadsheets.batchUpdate({
             spreadsheetId,
             requestBody: {
                 requests
             }
         })
-        console.log("After Sheets API call")
-        // TBD add error checking (e.g. if API call fails)
-        // console.log('Response', batchUpdateResponse)
+        console.log("Successful sheet update via Sheets API call")
 
-        // TBD remove image
-
-        // Send back parsed IDs
-        // TBD Send other success or failure response
-        res.json({
+        // Send success response
+        return res.json({
             spreadsheetId,
             sheetId,
             fileName: req.file.originalname
         })
     } catch (error) {
-        console.error(error.stack)
-        res.status(500).json({message: "An unexpected error occured"})
+        console.error('Error message', error.message)
+        console.error('Error stack', error.stack)
+        if (error.code) { // error comes from an external API call, e.g. Sheets API
+            if (error.code == 400) {
+                return res.status(500).json({message: 'Internal server error: invalid request to Sheets API'})
+            } else if (error.code === 401) {
+                return res.status(401).json({message: 'Access token is expired or invalid'})
+            } else if (error.code === 403) {
+                return res.status(403).json({message: 'No edit access to sheet'})
+            } else if (error.code === 404) {
+                return res.status(400).json({message: 'Invalid spreadsheet ID'})
+            } else if (error.code === 429) {
+                return res.status(429).json({message: "Hit Sheets API rate limit"})
+            } else if (error.code >= 500) {
+                return res.status(500).json({message: "Sheets API is currently unavailable"})
+            }
+        }
+        return res.status(500).json({message: "An unexpected error occurred"})
     }
 })
 
 app.listen(PORT, () => {
     console.log(`Backend server is up and running on port ${PORT}`)
 })
-
