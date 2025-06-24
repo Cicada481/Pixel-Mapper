@@ -60,7 +60,10 @@ const formUpload = multer({storage: imageStorage})
 
 // MIDDLEWARE STACK
 
-app.use(cors())
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true
+}))
 app.use(express.json())
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -278,8 +281,7 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
             fileName: req.file.originalname
         })
     } catch (error) {
-        console.error('Error message', error.message)
-        console.error('Error stack', error.stack)
+        console.error(error.stack)
         if (error.code) { // error comes from an external API call, e.g. Sheets API
             if (error.code == 400) {
                 return res.status(500).json({message: 'Internal server error: invalid request to Sheets API'})
