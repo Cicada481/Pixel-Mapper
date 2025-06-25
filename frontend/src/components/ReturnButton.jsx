@@ -5,7 +5,7 @@ const handleReturnClick = () => {
 const ReturnButton = () => {
     return (
         <button onClick={handleReturnClick}>
-            Return to home page
+            Return to main page
         </button>
     )
 }

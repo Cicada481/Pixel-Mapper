@@ -25,7 +25,7 @@ try {
         console.log(`Directory ${dirPath} created`)
     }
 } catch (error) {
-    console.error(error.stack)
+    console.error(error)
     process.exit(1)
 }
 
@@ -65,13 +65,13 @@ app.use(cors({
     credentials: true
 }))
 app.use(express.json())
-app.use(session({
+app.use(session({ // extracts session ID from incoming cookie
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false
 }))
 app.use(passport.initialize())
-app.use(passport.session()) // uses session ID in cookie to populate req.user
+app.use(passport.session()) // uses session ID to populate req.user
 
 // ROUTES
 
@@ -90,9 +90,34 @@ app.get('/api/current_user', (req, res) => {
     if (req.user) {
         console.log('req.user: ', req.user)
         console.log('User Access token from session: ', req.user.accessToken)
-        res.json(req.user)
+        return res.json(req.user)
     } else {
-        res.status(401).json({message: 'Not authorized'})
+        return res.status(401).json({message: 'Not authorized'})
+    }
+})
+
+app.post('/auth/logout', (req, res) => {
+    try {
+        // Callback-based synchronous functions that perform async operations
+        req.logout(err => {
+            if (err) {
+                console.error(err)
+                return res.status(500).json({message: 'Error during Passport logout'})
+            }
+
+            // No error during logout
+            req.session.destroy(err => {
+                if (err) {
+                    console.error(err)
+                    return res.status(500).json({message: 'Error destroying session'})
+                }
+
+                return res.json({message: 'Logged out successfully'})
+            })
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({message: 'Error in logout handler'})
     }
 })
 
@@ -107,26 +132,32 @@ app.get('/api/status', (req, res) => {
 // Content-Type multipart/form-data to be parsed by Multer instance
 app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) => {
     try {
-        // TBD add back later
         // if (!req.user) {
         //     return res.status(401).json({message: 'not logged in'})
         // }
 
         // Image details are contained in req.file
 
+        // Validate form fields
+        const formTextFields = ['sheetUrl', 'numColumns', 'cellWidth', 'cellHeight']
+        if (!req.file || formTextFields.some(fieldName => !Object.hasOwn(req.body, fieldName))) {
+            // At least one required form field is missing
+            return res.status(400).json({message: 'Missing form fields'})
+        }
+
         // Parse data entered by the user via form
-        const numColumns = parseInt(req.body.numColumns) // TBD check positive?
-        const cellWidth = parseInt(req.body.cellWidth)
-        const cellHeight = parseInt(req.body.cellHeight)
         const sheetUrl = req.body.sheetUrl
-        console.log('Form dimensions data', numColumns, cellWidth, cellHeight)
+        const numColumns = parseInt(req.body.numColumns) // TBD check positive?
+        const cellWidth = parseInt(req.body.cellWidth) // NaN if not an int
+        const cellHeight = parseInt(req.body.cellHeight) // NaN if not an int
         console.log('Spreadsheet URL', sheetUrl)
+        console.log('Form dimensions data', numColumns, cellWidth, cellHeight)
 
         // Parse URL for spreadsheet ID
         const spreadsheetIdStart = sheetUrl.indexOf('/d/') + '/d/'.length
         const spreadsheetIdEnd = sheetUrl.indexOf('/edit')
         if (spreadsheetIdStart === -1 || spreadsheetIdEnd === -1) {
-            return res.status(400).json({message: 'Link missing spreadsheet id'})
+            return res.status(400).json({message: 'Invalid spreadsheet link'})
         }
         const spreadsheetId = sheetUrl.substring(spreadsheetIdStart, spreadsheetIdEnd)
 
@@ -134,7 +165,7 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         const sheetIdStart = sheetUrl.indexOf('?gid=') + '?gid='.length
         const sheetIdEnd = sheetUrl.indexOf('#gid=')
         if (sheetIdStart === -1 || sheetIdEnd === -1) {
-            return res.status(400).json({message: 'Link missing sheet id'})
+            return res.status(400).json({message: 'Invalid sheet link'})
         }
         const sheetId = sheetUrl.substring(sheetIdStart, sheetIdEnd)
         
@@ -157,7 +188,6 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET
         )
-        // TBD Fix hardcoding of access token
         oauth2Client.setCredentials({access_token: process.env.TEST_ACCESS_TOKEN || req.user.accessToken})
         const sheets = google.sheets({version: 'v4', auth: oauth2Client})
 
@@ -281,7 +311,7 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
             fileName: req.file.originalname
         })
     } catch (error) {
-        console.error(error.stack)
+        console.error(error)
         if (error.code) { // error comes from an external API call, e.g. Sheets API
             if (error.code == 400) {
                 return res.status(500).json({message: 'Internal server error: invalid request to Sheets API'})

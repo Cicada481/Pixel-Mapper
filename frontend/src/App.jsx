@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react'
 import './App.css'
 import axios from 'axios'
 import LoginButton from './components/LoginButton.jsx'
-import ReturnButton from './components/ReturnButtons.jsx'
+import LogoutButton from './components/LogoutButton.jsx'
+import ReturnButton from './components/ReturnButton.jsx'
+import ProcessingForm from './components/ProcessingForm.jsx'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -11,10 +13,9 @@ function App() {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const currentUserResponse = await axios.get(
-          'http://localhost:3001/api/current_user',
-          {withCredentials: true} // for CORS
-        )
+        const currentUserResponse = await axios.get('http://localhost:3001/api/current_user', {
+          withCredentials: true // for CORS
+        })
         setIsLoggedIn(true)
         setUserName(currentUserResponse.data.displayName)
       } catch (error) {
@@ -40,6 +41,8 @@ function App() {
     return (
       <>
         <p>Logged in as {userName}</p>
+        <LogoutButton setIsLoggedIn={setIsLoggedIn} setUserName={setUserName}/>
+        <ProcessingForm />
       </>
     )
   } else { // Default page, user is not logged in
