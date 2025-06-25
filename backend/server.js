@@ -132,9 +132,10 @@ app.get('/api/status', (req, res) => {
 // Content-Type multipart/form-data to be parsed by Multer instance
 app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) => {
     try {
-        // if (!req.user) {
-        //     return res.status(401).json({message: 'not logged in'})
-        // }
+        // No valid session found for user
+        if (!req.user) {
+            return res.status(401).json({message: 'not logged in'})
+        }
 
         // Image details are contained in req.file
 
@@ -147,7 +148,13 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
 
         // Parse data entered by the user via form
         const sheetUrl = req.body.sheetUrl
-        const numColumns = parseInt(req.body.numColumns) // TBD check positive?
+        const numColumns = parseInt(req.body.numColumns)
+        if (!(numColumns > 0)) { // Validation: check for positive number
+            return res.status(400).json({
+                message: 'Number of columns must be positive',
+                code: 'NON_POSITIVE_COLUMNS'
+            })
+        }
         const cellWidth = parseInt(req.body.cellWidth) // NaN if not an int
         const cellHeight = parseInt(req.body.cellHeight) // NaN if not an int
         console.log('Spreadsheet URL', sheetUrl)
@@ -188,7 +195,7 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET
         )
-        oauth2Client.setCredentials({access_token: process.env.TEST_ACCESS_TOKEN || req.user.accessToken})
+        oauth2Client.setCredentials({access_token: req.user.accessToken})
         const sheets = google.sheets({version: 'v4', auth: oauth2Client})
 
         // Find the current dimensions (number of rows and cols) of the sheet
@@ -228,7 +235,7 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
             requests.push({appendDimension: appendRows})
         }
 
-        // Modify the width of cells in the image if the user asked
+        // Modify the width of spreadsheet cells if the user asked
         if (cellWidth) {
             const updateCellWidths = { // UpdateDimensionPropertiesRequest object
                 properties: {
@@ -245,7 +252,7 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
             requests.push({updateDimensionProperties: updateCellWidths})
         }
 
-        // Modify the height of cells in the image if the user asked
+        // Modify the height of spreadsheet cells if the user asked
         if (cellHeight) {
             const updateCellHeights = { // UpdateDimensionPropertiesRequest object
                 properties: {

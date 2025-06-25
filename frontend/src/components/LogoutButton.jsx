@@ -1,12 +1,11 @@
 import axios from 'axios'
 
 const LogoutButton = ({setIsLoggedIn, setUserName}) => {
-    // this function is defined inside the component to use the prop variable
     const handleLogoutClick = async () => {
         try {
             // wait for backend to log out of session
             await axios.post('http://localhost:3001/auth/logout', {}, {
-                withCredentials: true
+                withCredentials: true // cors
             })
 
             // update user state on the frontend
