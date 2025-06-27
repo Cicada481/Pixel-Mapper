@@ -1,8 +1,17 @@
 #root {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
+
+  box-sizing: border-box;
+  min-height: 100vh;
+
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
 .logo {
@@ -39,4 +48,119 @@
 
 .read-the-docs {
   color: #888;
+}
+
+
+#logged-in-content {
+  max-width: 460px;
+  margin: 0 auto;
+}
+
+h2 {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+#form-component {
+  padding: 8px;
+  border-radius: 30px;
+  background-color: #91e196;
+  font-size: 1.1em;
+}
+
+#processing-form {
+  padding: 0 20px 5px 20px;
+}
+
+p.form-field-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: -8px;
+  align-items: center;
+}
+
+input {
+  width: 200px;
+  padding: 10px;
+
+  border-radius: 20px;
+  border: 2px solid var(--main-text-color);
+}
+
+input[type='file'] {
+  border-color: transparent /* override */
+}
+
+.optional-field-indicator {
+  color: rgb(144, 144, 144);
+}
+
+#sheet-response-message {
+  border-style: solid;
+  border-width: 2px;
+  border-radius: 10px;
+  margin: 10px;
+  padding: 3px;
+}
+
+.success-message {
+  border-color: rgb(104, 174, 0);
+  background-color: #56ff61;
+}
+
+.failure-message {
+  border-color: red;
+  color: red;
+  background-color: rgb(255, 201, 201);
+}
+
+#user-info {
+  font-size: 1.1em;
+}
+
+#header-info {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#main-header-title {
+  /* for a less jarring contrast */
+  color: #529337;
+}
+
+#demonstration {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+
+  img {
+    max-height: 350px;
+    min-width: 0;
+    max-width: 100%;
+    flex-shrink: 1;
+  }
+}
+
+#arrow-image {
+  max-height: 150px;
+}
+
+#login-button {
+  margin-top: 1.5em;
+}
+
+#github-link-div {
+  margin-bottom: 20px;
+}
+
+#github-repo-link {
+  font-size: 0.9em;
+  color: lightslategray;
+}
+
+* {
+  box-sizing: border-box;
 }

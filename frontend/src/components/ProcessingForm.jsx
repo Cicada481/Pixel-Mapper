@@ -86,48 +86,45 @@ const ProcessingForm = () => {
     if (isLoading) {
         sheetUpdateStatusDisplay = <div><span>Processing image...</span></div>
     } else if (responseMessage) {
-        const responseMessageStyle = {
-            border: '2px solid',
-            borderColor: isError ? 'red' : 'greenyellow'
-        }
-        sheetUpdateStatusDisplay = <div><span style={responseMessageStyle}>{responseMessage}</span></div>
+        const finalUpdateStatus = isError ? 'failure-message' : 'success-message';
+        sheetUpdateStatusDisplay = <div id='sheet-response-message' class={finalUpdateStatus}>{responseMessage}</div>
     }
 
     return (
-        <div style={{border: '2px solid blue'}}>
+        <div id="form-component">
             <h2>Image to Spreadsheet Converter</h2>
-            <form onSubmit={handleSubmit} style={{border: '2px solid red'}}>
-                <p>
-                    <label>Google Sheets Link</label>
+            <form id="processing-form" onSubmit={handleSubmit}>
+                <p class="form-field-group">
+                    <label>Google Sheets Link:</label>
                     <input type='text' name='sheetUrl' value={sheetUrl} onChange={(event) => {
                         setSheetUrl(event.target.value)
                     }} required />
                 </p>
-                <p>
-                    <label>Upload image</label>
+                <p class="form-field-group">
+                    <label>Upload image:</label>
                     <input type='file' name='uploadedImage' accept={acceptedImageTypes} onChange={(event)=>{
                         setUploadedImage(event.target.files[0])
                     }} required />
                 </p>
-                <p>
-                    <label>Number of Columns</label>
-                    <input type='number' name='numColumns' value={numColumns} onChange={(event) => {
+                <p class="form-field-group">
+                    <label>Number of Columns:</label>
+                    <input type='number' name='numColumns' value={numColumns} placeholder='e.g. 100 (max 300)' onChange={(event) => {
                         setNumColumns(event.target.value)
                     }} required />
                 </p>
-                <p>
-                    <label>Cell Width (Optional)</label>
-                    <input type='number' name='cellWidth' value={cellWidth} onChange={(event) => {
+                <p class="form-field-group">
+                    <label><span class='optional-field-indicator'>(Optional)</span> Cell Width:</label>
+                    <input type='number' name='cellWidth' value={cellWidth} placeholder='e.g. 5' onChange={(event) => {
                         setCellWidth(event.target.value)
                     }} />
                 </p>
-                <p>
-                    <label>Cell Height (Optional)</label>
-                    <input type='number' name='cellHeight' value={cellHeight} onChange={(event) => {
+                <p class="form-field-group">
+                    <label><span class='optional-field-indicator'>(Optional)</span> Cell Height:</label>
+                    <input type='number' name='cellHeight' value={cellHeight} placeholder='e.g. 5' onChange={(event) => {
                         setCellHeight(event.target.value)
                     }} />
                 </p>
-                <button type='submit' disabled={isLoading}>Convert Image to Spreadsheet</button>
+                <button id="convert-button" type='submit' disabled={isLoading}>Convert Image to Spreadsheet</button>
             </form>
             {sheetUpdateStatusDisplay}
         </div>

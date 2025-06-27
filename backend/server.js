@@ -148,17 +148,22 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
 
         // Parse data entered by the user via form
         const sheetUrl = req.body.sheetUrl
-        const numColumns = parseInt(req.body.numColumns)
-        if (!(numColumns > 0)) { // Validation: check for positive number
+        let numColumns = parseInt(req.body.numColumns)
+        const cellWidth = parseInt(req.body.cellWidth) // NaN if not an int
+        const cellHeight = parseInt(req.body.cellHeight) // NaN if not an int
+        console.log('Spreadsheet URL', sheetUrl)
+        console.log('Form dimensions data', numColumns, cellWidth, cellHeight)
+
+        // Validation on the number of columns
+        if (!(numColumns > 0)) {
             return res.status(400).json({
                 message: 'Number of columns must be positive',
                 code: 'NON_POSITIVE_COLUMNS'
             })
         }
-        const cellWidth = parseInt(req.body.cellWidth) // NaN if not an int
-        const cellHeight = parseInt(req.body.cellHeight) // NaN if not an int
-        console.log('Spreadsheet URL', sheetUrl)
-        console.log('Form dimensions data', numColumns, cellWidth, cellHeight)
+        if (numColumns > 300) {
+            numColumns = 300
+        }
 
         // Parse URL for spreadsheet ID
         const spreadsheetIdStart = sheetUrl.indexOf('/d/') + '/d/'.length

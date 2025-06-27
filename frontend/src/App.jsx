@@ -5,6 +5,9 @@ import LoginButton from './components/LoginButton.jsx'
 import LogoutButton from './components/LogoutButton.jsx'
 import ReturnButton from './components/ReturnButton.jsx'
 import ProcessingForm from './components/ProcessingForm.jsx'
+import Demonstration from './components/Demonstration.jsx'
+import GitHubLink from './components/GitHubLink.jsx'
+import HeaderTitle from './components/HeaderTitle.jsx'
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
@@ -14,7 +17,7 @@ function App() {
     const checkLogin = async () => {
       try {
         const currentUserResponse = await axios.get('http://localhost:3001/api/current_user', {
-          withCredentials: true // for CORS
+          withCredentials: true // for cors
         })
         setIsLoggedIn(true)
         setUserName(currentUserResponse.data.displayName)
@@ -30,26 +33,44 @@ function App() {
     checkLogin()
   }, [])
 
+  let mainContent = null
+
   if (window.location.pathname === '/login-error') {
-    return (
+    mainContent = (
       <>
+        <HeaderTitle />
         <p>Error logging in. Please try again.</p>
         <ReturnButton />
       </>
     )
   } else if (isLoggedIn) {
-    return (
-      <>
-        <p>Logged in as {userName}</p>
-        <LogoutButton setIsLoggedIn={setIsLoggedIn} setUserName={setUserName}/>
+    mainContent = (
+      <div id='logged-in-content'>
+        <div id='header-info'>
+          <p id='user-info'>Logged in as {userName}</p>
+          <LogoutButton setIsLoggedIn={setIsLoggedIn} setUserName={setUserName}/>
+        </div>
         <ProcessingForm />
-      </>
+      </div>
     )
   } else { // Default page, user is not logged in
-    return (
-      <LoginButton />
+    mainContent = (
+      <>
+        <HeaderTitle />
+        <Demonstration />
+        <div><LoginButton /></div>
+      </>
     )
   }
+
+  return (
+    <>
+      <div id='app-main-content'>
+        {mainContent}
+      </div>
+      <GitHubLink />
+    </>
+  )
 }
 
 export default App

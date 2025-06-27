@@ -5,7 +5,7 @@ const LoginButton = () => {
     }
 
     return (
-        <button onClick={handleLoginClick}>
+        <button id='login-button' onClick={handleLoginClick}>
             Sign in with Google
         </button>
     )
