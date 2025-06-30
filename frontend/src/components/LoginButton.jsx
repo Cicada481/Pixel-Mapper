@@ -1,7 +1,8 @@
 const LoginButton = () => {
     const handleLoginClick = () => {
         // Browser-level redirect to authenticate with Google
-        window.location.href = 'http://localhost:3001/auth/google'
+        const backendUrl = import.meta.env.VITE_BACKEND_URL
+        window.location.href = `${backendUrl}/auth/google`
     }
 
     return (

@@ -4,7 +4,8 @@ const LogoutButton = ({setIsLoggedIn, setUserName}) => {
     const handleLogoutClick = async () => {
         try {
             // wait for backend to log out of session
-            await axios.post('http://localhost:3001/auth/logout', {}, {
+            const backendUrl = import.meta.env.VITE_BACKEND_URL
+            await axios.post(`${backendUrl}/auth/logout`, {}, {
                 withCredentials: true // cors
             })
 

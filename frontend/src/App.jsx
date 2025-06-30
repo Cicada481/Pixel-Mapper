@@ -16,7 +16,8 @@ function App() {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const currentUserResponse = await axios.get('http://localhost:3001/api/current_user', {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL
+        const currentUserResponse = await axios.get(`${backendUrl}/api/current_user`, {
           withCredentials: true // for cors
         })
         setIsLoggedIn(true)
