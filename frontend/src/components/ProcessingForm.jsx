@@ -66,7 +66,7 @@ const ProcessingForm = () => {
                 } else if (error.response.status === 401) {
                     setResponseMessage('An error has occurred. Please try logging in again.')
                 } else if (error.response.status === 403) {
-                    setResponseMessage('Your Google account doesn\'t have edit access to this spreadsheet.')
+                    setResponseMessage('Your Google account does not have edit access, or you did not grant this app edit access.')
                 } else if (error.response.status === 429) {
                     setResponseMessage('The server is currently busy. Please try again later.')
                 } else {
