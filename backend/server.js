@@ -16,7 +16,7 @@ const app = express()
 
 const PORT = process.env.PORT || 3001
 const UPLOADS_DIR_PATH = path.join(__dirname, 'image_uploads')
-const REDIRECT_URI = `http://localhost:${PORT}/auth/google/callback`;
+const REDIRECT_URI = `${process.env.BACKEND_URL}/auth/google/callback`;
 
 // Create image uploads directory path
 try {
