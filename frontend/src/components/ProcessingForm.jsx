@@ -88,39 +88,39 @@ const ProcessingForm = () => {
         sheetUpdateStatusDisplay = <div><span>Processing image...</span></div>
     } else if (responseMessage) {
         const finalUpdateStatus = isError ? 'failure-message' : 'success-message';
-        sheetUpdateStatusDisplay = <div id='sheet-response-message' class={finalUpdateStatus}>{responseMessage}</div>
+        sheetUpdateStatusDisplay = <div id='sheet-response-message' className={finalUpdateStatus}>{responseMessage}</div>
     }
 
     return (
         <div id="form-component">
             <h2>Image to Spreadsheet Converter</h2>
             <form id="processing-form" onSubmit={handleSubmit}>
-                <p class="form-field-group">
+                <p className="form-field-group">
                     <label>Google Sheets Link:</label>
                     <input type='text' name='sheetUrl' value={sheetUrl} onChange={(event) => {
                         setSheetUrl(event.target.value)
                     }} required />
                 </p>
-                <p class="form-field-group">
+                <p className="form-field-group">
                     <label>Upload image:</label>
                     <input type='file' name='uploadedImage' accept={acceptedImageTypes} onChange={(event)=>{
                         setUploadedImage(event.target.files[0])
                     }} required />
                 </p>
-                <p class="form-field-group">
+                <p className="form-field-group">
                     <label>Number of Columns:</label>
                     <input type='number' name='numColumns' value={numColumns} placeholder='e.g. 100 (max 300)' onChange={(event) => {
                         setNumColumns(event.target.value)
                     }} required />
                 </p>
-                <p class="form-field-group">
-                    <label><span class='optional-field-indicator'>(Optional)</span> Cell Width:</label>
+                <p className="form-field-group">
+                    <label><span className='optional-field-indicator'>(Optional)</span> Cell Width:</label>
                     <input type='number' name='cellWidth' value={cellWidth} placeholder='e.g. 5' onChange={(event) => {
                         setCellWidth(event.target.value)
                     }} />
                 </p>
-                <p class="form-field-group">
-                    <label><span class='optional-field-indicator'>(Optional)</span> Cell Height:</label>
+                <p className="form-field-group">
+                    <label><span className='optional-field-indicator'>(Optional)</span> Cell Height:</label>
                     <input type='number' name='cellHeight' value={cellHeight} placeholder='e.g. 5' onChange={(event) => {
                         setCellHeight(event.target.value)
                     }} />

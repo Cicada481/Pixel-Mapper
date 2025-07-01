@@ -92,6 +92,7 @@ app.get('/api/current_user', (req, res) => {
         console.log('User Access token from session: ', req.user.accessToken)
         return res.json(req.user)
     } else {
+        console.log('No user found')
         return res.status(401).json({message: 'Not authorized'})
     }
 })

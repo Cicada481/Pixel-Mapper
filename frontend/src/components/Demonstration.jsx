@@ -5,9 +5,9 @@ import parakeetSheets from './../assets/parakeet_sheets.png'
 const Demonstration = () => {
     return (
         <div id='demonstration'>
-            <img src={parakeet} class='flexed-image' alt='Photo of a parakeet'/>
-            <img src={arrow} class='flexed-image' id='arrow-image' alt='Arrow pointing to the right' />
-            <img src={parakeetSheets} class='flexed-image' alt='Pixel art of a parakeet on a Google Sheet' />
+            <img src={parakeet} className='flexed-image' alt='Photo of a parakeet'/>
+            <img src={arrow} className='flexed-image' id='arrow-image' alt='Arrow pointing to the right' />
+            <img src={parakeetSheets} className='flexed-image' alt='Pixel art of a parakeet on a Google Sheet' />
         </div>
     )
 }
