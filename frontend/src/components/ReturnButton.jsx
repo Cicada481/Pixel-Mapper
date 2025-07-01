@@ -1,7 +1,8 @@
 const ReturnButton = () => {
     const handleReturnClick = () => {
         // Browser-level redirect to home page
-        window.location.href = 'http://localhost:5173/'
+        const frontendUrl = import.meta.env.VITE_FRONTEND_URL
+        window.location.href = frontendUrl
     }
 
     return (

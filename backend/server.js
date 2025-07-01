@@ -81,8 +81,8 @@ app.get('/auth/google', passport.authenticate('google', {
 }))
 
 app.get('/auth/google/callback', passport.authenticate('google', {
-    successRedirect: 'http://localhost:5173',
-    failureRedirect: 'http://localhost:5173/login-error'
+    successRedirect: process.env.FRONTEND_URL,
+    failureRedirect: `${process.env.FRONTEND_URL}/login-error`
     // involves token exchanges after the user grants permission
 }))
 
