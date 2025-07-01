@@ -17,12 +17,16 @@ function App() {
     const checkLogin = async () => {
       try {
         const backendUrl = import.meta.env.VITE_BACKEND_URL
+        console.log("Checking login")
         const currentUserResponse = await axios.get(`${backendUrl}/api/current_user`, {
           withCredentials: true // for cors
         })
+        console.log('API call link', `${backendUrl}/api/current_user`)
         setIsLoggedIn(true)
         setUserName(currentUserResponse.data.displayName)
       } catch (error) {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL
+        console.log('API call link', `${backendUrl}/api/current_user`)
         if (error.response.status == 401) { // Not logged in
           setIsLoggedIn(false)
           setUserName(null)
