@@ -5,4 +5,7 @@ node_modules/
 build/
 dest/
 
+/frontend/.env.development
+/frontend/.env.production
+
 image_uploads/
