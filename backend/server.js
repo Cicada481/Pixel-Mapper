@@ -69,7 +69,7 @@ app.use(session({ // extracts session ID from incoming cookie
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    // proxy: true,
+    proxy: true,
     cookie: {
         sameSite: 'None', // required for cross-site cookie sending
         secure: process.env.NODE_ENV === 'production' // must be true if SameSite=None
