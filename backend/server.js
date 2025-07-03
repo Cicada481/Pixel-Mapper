@@ -61,7 +61,7 @@ const formUpload = multer({storage: imageStorage})
 // MIDDLEWARE STACK
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL, // any origin by default
     credentials: true
 }))
 app.use(express.json())
@@ -69,10 +69,10 @@ app.use(session({ // extracts session ID from incoming cookie
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    proxy: true,
+    // proxy: true,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'None'
+        sameSite: 'None', // required for cross-site cookie sending
+        secure: process.env.NODE_ENV === 'production' // must be true if SameSite=None
     }
 }))
 app.use(passport.initialize())

@@ -19,7 +19,7 @@ function App() {
         const backendUrl = import.meta.env.VITE_BACKEND_URL
         console.log("Checking login")
         const currentUserResponse = await axios.get(`${backendUrl}/api/current_user`, {
-          withCredentials: true // for cors
+          withCredentials: true // for sending cookies
         })
         console.log('API call link', `${backendUrl}/api/current_user`)
         setIsLoggedIn(true)
