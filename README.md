@@ -4,4 +4,4 @@ A full-stack web application where a user logs in using Google, inputs a URL to 
 
 # Browser Compatibility
 
-Note on Browser Compatibility: The application's Google Sign-In flow is designed with industry-standard SameSite=None; Secure cookie configurations for cross-site communication. Due to increasingly aggressive default privacy settings in some browsers (e.g., Chrome Incognito, Firefox Enhanced Tracking Protection, Safari Intelligent Tracking Prevention), the login flow may not function as expected in these stricter modes. For the best experience, please use a standard Chrome browser (non-Incognito) or Opera.
+Note on Browser Compatibility: The application's Google Sign-In flow is designed with industry-standard `SameSite=None; Secure` cookie configurations for cross-site communication. Due to increasingly aggressive default privacy settings in some browsers (e.g., Chrome Incognito, Firefox Enhanced Tracking Protection, Safari Intelligent Tracking Prevention), the login flow may not function as expected in these stricter modes. For the best experience, please use a standard Chrome browser (non-Incognito) or Opera.
