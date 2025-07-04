@@ -109,19 +109,19 @@ const ProcessingForm = () => {
                 </p>
                 <p className="form-field-group">
                     <label>Number of Columns:</label>
-                    <input type='number' name='numColumns' value={numColumns} placeholder='e.g. 100 (max 300)' onChange={(event) => {
+                    <input type='number' name='numColumns' value={numColumns} placeholder='e.g. 50 (max 300)' onChange={(event) => {
                         setNumColumns(event.target.value)
                     }} required />
                 </p>
                 <p className="form-field-group">
                     <label><span className='optional-field-indicator'>(Optional)</span> Cell Width:</label>
-                    <input type='number' name='cellWidth' value={cellWidth} placeholder='e.g. 5' onChange={(event) => {
+                    <input type='number' name='cellWidth' value={cellWidth} placeholder='e.g. 10 (min 2)' onChange={(event) => {
                         setCellWidth(event.target.value)
                     }} />
                 </p>
                 <p className="form-field-group">
                     <label><span className='optional-field-indicator'>(Optional)</span> Cell Height:</label>
-                    <input type='number' name='cellHeight' value={cellHeight} placeholder='e.g. 5' onChange={(event) => {
+                    <input type='number' name='cellHeight' value={cellHeight} placeholder='e.g. 10 (min 2)' onChange={(event) => {
                         setCellHeight(event.target.value)
                     }} />
                 </p>
