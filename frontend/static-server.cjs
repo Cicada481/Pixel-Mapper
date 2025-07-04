@@ -9,8 +9,6 @@ const app = express()
 
 const PORT = process.env.PORT || 3000
 
-console.log('env1', process.env.VITE_FRONTEND_URL, process.env.VITE_BACKEND_URL)
-
 // Serve any relevant files found in the dist directory 
 app.use(express.static(path.join(__dirname, 'dist')))
 

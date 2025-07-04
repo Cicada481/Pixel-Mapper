@@ -16,8 +16,6 @@ function App() {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        console.log('env0', import.meta.env.VITE_FRONTEND_URL, import.meta.env.VITE_BACKEND_URL)
-
         const backendUrl = import.meta.env.VITE_BACKEND_URL
         console.log("Checking login")
         const currentUserResponse = await axios.get(`${backendUrl}/api/current_user`, {
