@@ -69,11 +69,11 @@ app.use(session({ // extracts session ID from incoming cookie
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    // proxy: true,
-    // cookie: {
-    //     sameSite: 'None', // required for cross-site cookie sending
-    //     secure: process.env.NODE_ENV === 'production' // must be true if SameSite=None
-    // }
+    proxy: true,
+    cookie: {
+        sameSite: 'None', // required for cross-site cookie sending
+        secure: process.env.NODE_ENV === 'production' // must be true if SameSite=None
+    }
 }))
 app.use(passport.initialize())
 app.use(passport.session()) // uses session ID to populate req.user
