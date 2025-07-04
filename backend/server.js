@@ -18,6 +18,8 @@ const PORT = process.env.PORT || 3001
 const UPLOADS_DIR_PATH = path.join(__dirname, 'image_uploads')
 const REDIRECT_URI = `${process.env.BACKEND_URL}/auth/google/callback`;
 
+const isProduction = process.env.NODE_ENV === 'production'
+
 // Create image uploads directory path
 try {
     const dirPath = fs.mkdirSync(UPLOADS_DIR_PATH, {recursive: true})
@@ -69,11 +71,10 @@ app.use(session({ // extracts session ID from incoming cookie
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-    proxy: true,
-    cookie: {
-        sameSite: 'None', // required for cross-site cookie sending
-        secure: process.env.NODE_ENV === 'production' // must be true if SameSite=None
-    }
+    ...(isProduction && {
+        proxy: true,
+        cookie: {secure: true}
+    })  
 }))
 app.use(passport.initialize())
 app.use(passport.session()) // uses session ID to populate req.user
