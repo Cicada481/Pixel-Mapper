@@ -250,7 +250,7 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         if (cellWidth) {
             const updateCellWidths = { // UpdateDimensionPropertiesRequest object
                 properties: {
-                    pixelSize: cellWidth
+                    pixelSize: cellWidth + 1
                 },
                 fields: 'pixelSize',
                 range: {
@@ -267,7 +267,7 @@ app.post('/process-sheet', formUpload.single('uploadedImage'), async (req, res) 
         if (cellHeight) {
             const updateCellHeights = { // UpdateDimensionPropertiesRequest object
                 properties: {
-                    pixelSize: cellHeight + 1 // To account for Sheets API offset
+                    pixelSize: cellHeight
                 },
                 fields: 'pixelSize',
                 range: {
