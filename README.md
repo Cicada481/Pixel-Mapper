@@ -24,5 +24,5 @@ Backend API (for informational purposes): https://pixel-mapper-production.up.rai
 # Technologies Used
 * **Frontend:** React, Plain CSS
 * **Backend:** Node.js, Express.js, Passport.js, googleapis, Multer, Jimp
-* **Database:** PostgreSQL for persistent user session storage
+* **Database:** PostgreSQL
 * **Deployment:** Railway
