@@ -72,3 +72,9 @@ button:focus-visible {
     background-color: white;
   }
 }
+
+/* Standardize colors on dark mode */
+
+button {
+  background-color: white;
+}

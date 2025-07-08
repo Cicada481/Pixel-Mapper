@@ -81,11 +81,15 @@ p.form-field-group {
 }
 
 input {
-  width: 200px;
+  width: 210px;
   padding: 10px;
 
   border-radius: 20px;
   border: 2px solid var(--main-text-color);
+}
+
+input:not([type='file']) {
+  background-color: white;
 }
 
 input[type='file'] {
