@@ -1,13 +1,13 @@
 import arrow from './../assets/arrow.svg'
-import parakeet from './../assets/parakeet.jpg'
-import parakeetSheets from './../assets/parakeet_sheets.png'
+import dinosaur from './../assets/dinosaur.jpg'
+import dinosaurPixel from './../assets/dinosaur_pixel.png'
 
 const Demonstration = () => {
     return (
         <div id='demonstration'>
-            <img src={parakeet} className='flexed-image' alt='Photo of a parakeet'/>
-            <img src={arrow} className='flexed-image' id='arrow-image' alt='Arrow pointing to the right' />
-            <img src={parakeetSheets} className='flexed-image' alt='Pixel art of a parakeet on a Google Sheet' />
+            <img src={dinosaur} alt='Photo of a dinosaur'/>
+            <img src={arrow} id='arrow-image' alt='Arrow pointing to the right' />
+            <img src={dinosaurPixel} alt='Pixel art of a dinosaur on a Google Sheet' />
         </div>
     )
 }

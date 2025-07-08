@@ -139,6 +139,7 @@ input[type='file'] {
   display: flex;
   align-items: center;
   gap: 40px;
+  justify-content: center;
 
   img {
     max-height: 350px;
