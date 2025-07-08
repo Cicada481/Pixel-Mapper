@@ -90,6 +90,7 @@ input {
 
 input:not([type='file']) {
   background-color: white;
+  color: black;
 }
 
 input[type='file'] {
