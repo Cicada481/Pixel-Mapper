@@ -11,6 +11,8 @@ const path = require('path')
 const { Jimp } = require('jimp')
 const { intToRGBA } = require('@jimp/utils')
 const { google } = require('googleapis')
+const { Pool } = require('pg')
+const pgSessionFactory = require('connect-pg-simple')
 
 const app = express()
 
@@ -60,6 +62,15 @@ const imageStorage = multer.diskStorage({
 })
 const formUpload = multer({storage: imageStorage})
 
+// Use a PostgreSQL database for session store
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+const pgSession = pgSessionFactory(session)
+const sessionStore = new pgSession({
+    pool: pool,
+    tableName: 'session'
+})
+
 // MIDDLEWARE STACK
 
 app.use(cors({
@@ -71,6 +82,7 @@ app.use(session({ // extracts session ID from incoming cookie
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: sessionStore,
     ...(isProduction && {
         proxy: true,
         cookie: {secure: true}
