@@ -12,6 +12,7 @@ import HeaderTitle from './components/HeaderTitle.jsx'
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [userName, setUserName] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -24,12 +25,14 @@ function App() {
         console.log('API call link', `${backendUrl}/api/current_user`)
         setIsLoggedIn(true)
         setUserName(currentUserResponse.data.displayName)
+        setIsLoading(false)
       } catch (error) {
         const backendUrl = import.meta.env.VITE_BACKEND_URL
         console.log('API call link', `${backendUrl}/api/current_user`)
         if (error.response.status == 401) { // Not logged in
           setIsLoggedIn(false)
           setUserName(null)
+          setIsLoading(false)
         } else {
           console.error("Unexpected error", error)
         }
@@ -40,7 +43,9 @@ function App() {
 
   let mainContent = null
 
-  if (window.location.pathname === '/login-error') {
+  if (isLoading) {
+    mainContent = null
+  } else if (window.location.pathname === '/login-error') {
     mainContent = (
       <>
         <HeaderTitle />
