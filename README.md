@@ -22,7 +22,7 @@ Backend API (for informational purposes): https://pixel-mapper-production.up.rai
 * **Full-Stack Deployment:** The application is fully deployed with the frontend and the backend on Railway.
 
 # Technologies Used
-* **Frontend:** React, Plain CSS
+* **Frontend:** React, CSS
 * **Backend:** Node.js, Express.js, Passport.js, googleapis, Multer, Jimp
 * **Database:** PostgreSQL
 * **Deployment:** Railway
